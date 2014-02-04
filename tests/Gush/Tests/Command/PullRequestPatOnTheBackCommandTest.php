@@ -19,56 +19,39 @@ use Gush\Tests\Fixtures\OutputFixtures;
  */
 class PullRequestPatOnTheBackCommandTest extends BaseTestCase
 {
-    const TEST_BRANCH_NAME = 'test_branch';
-
     public function testCommand()
     {
-        $processHelper = $this->expectProcessHelper();
-        $tester = $this->getCommandTester($command = new PullRequestPatOnTheBackCommand());
-        $command->getHelperSet()->set($processHelper, 'process');
-
-        $tester->execute([]);
-
-        $this->assertEquals(OutputFixtures::PULL_REQUEST_PAT_ON_THE_BACK, trim($tester->getDisplay()));
-    }
-
-    private function expectProcessHelper()
-    {
-        $processHelper = $this->getMock(
-            'Gush\Helper\ProcessHelper',
-            ['runCommands', 'probePhpCsFixer']
-        );
-        $processHelper->expects($this->once())
-            ->method('probePhpCsFixer')
-        ;
-        $processHelper->expects($this->once())
-            ->method('runCommands')
-            ->with(
+        $this->httpClient->whenGet('repos/cordoval/gush/pulls/40')
+            ->thenReturn(
                 [
-                    [
-                        'line' => 'git add .',
-                        'allow_failures' => true
-                    ],
-                    [
-                        'line' => 'git commit -am wip',
-                        'allow_failures' => true
-                    ],
-                    [
-                        'line' => 'php-cs-fixer fix .',
-                        'allow_failures' => true
-                    ],
-                    [
-                        'line' => 'git add .',
-                        'allow_failures' => true
-                    ],
-                    [
-                        'line' => 'git commit -am cs-fixer',
-                        'allow_failures' => true
-                    ]
+                    'number' => 60,
+                    'state' => "open",
+                    'user' => ['login' => 'weaverryan'],
+                    'assignee' => ['login' => 'cordoval'],
+                    'pull_request' => [],
+                    'milestone' => ['title' => "Conquer the world"],
+                    'labels' => [['name' => 'actionable'], ['name' => 'easy pick']],
+                    'title' => 'Write a behat test to launch strategy',
+                    'body' => 'Help me conquer the world. Teach them to use gush.',
+                    'base' => ['label' => 'master']
                 ]
             )
         ;
 
-        return $processHelper;
+        $this->httpClient->whenPost(
+                'repos/cordoval/gush/issues/40/comments',
+                "{'org':'cordoval','repo':'gush','number':'40'}"
+            )->thenReturn(
+                [
+                    'number' => 60,
+                    'state' => "open",
+                ]
+            )
+        ;
+
+        $tester = $this->getCommandTester($command = new PullRequestPatOnTheBackCommand());
+        $tester->execute([]);
+
+        $this->assertEquals(OutputFixtures::PULL_REQUEST_PAT_ON_THE_BACK, trim($tester->getDisplay()));
     }
 }
