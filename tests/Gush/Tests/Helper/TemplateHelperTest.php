@@ -178,7 +178,10 @@ class TemplateHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $res);
     }
 
-    public function text_x_what_we_just_added()
+    /**
+     * @test
+     */
+    public function bind_()
     {
         $this->assertTrue(true);
     }

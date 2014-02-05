@@ -6,6 +6,8 @@ use Gush\Template\Pats\PatTemplate;
 
 class PatTemplateTest extends \PHPUnit_Framework_TestCase
 {
+    const TEST_AUTHOR = 'cslucano';
+
     /** @var \Gush\Template\Pats\PatTemplate */
     protected $template;
 
@@ -19,19 +21,11 @@ class PatTemplateTest extends \PHPUnit_Framework_TestCase
      */
     public function it_renders_string_with_placeholders_replaced()
     {
-        $requirements = $this->template->getRequirements();
+        $this->template->bind(['author' => self::TEST_AUTHOR]);
 
-        foreach ($requirements as $key => $reqs) {
-            list ($prompt, $default) = $reqs;
-            if (!isset($params[$key])) {
-                $params[$key] = $default;
-            }
-        }
-
-        $params['description'] = 'This is a description';
-
-        $this->template->bind($params);
-        $res = $this->template->render();
-        $this->assertEquals($expected, $res);
+        $this->assertContains(
+            self::TEST_AUTHOR,
+            $this->template->render()
+        );
     }
 }

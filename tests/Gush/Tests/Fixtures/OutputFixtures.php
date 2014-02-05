@@ -68,5 +68,4 @@ EOT;
     const PULL_REQUEST_PAT_ON_THE_BACK = <<<EOT
 Pat on the back pushed to https://github.com/cordoval/gush/pull/7
 EOT;
-
 }

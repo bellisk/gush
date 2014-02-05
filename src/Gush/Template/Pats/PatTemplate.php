@@ -12,7 +12,6 @@
 namespace Gush\Template\Pats;
 
 use Gush\Template\AbstractTemplate;
-use Gush\Template\Pats;
 
 class PatTemplate extends AbstractTemplate
 {
@@ -22,7 +21,7 @@ class PatTemplate extends AbstractTemplate
     public function getRequirements()
     {
         return [
-            'author' => ['', 'author_place_holder'],
+            'author' => 'author_place_holder',
         ];
     }
 
@@ -37,9 +36,7 @@ class PatTemplate extends AbstractTemplate
             throw new \RuntimeException('Template has not been bound');
         }
 
-        $placeholders = $this->parameters;
-\ladybug_dump_die($placeholders);
-        return $this->renderRandomPat($placeholders);
+        return $this->renderRandomPat($this->parameters);
     }
 
     private function renderRandomPat(array $placeHolders)
