@@ -19,23 +19,26 @@ use Gush\Tests\Fixtures\OutputFixtures;
  */
 class PullRequestPatOnTheBackCommandTest extends BaseTestCase
 {
+    const TEMPLATE_STRING = "Good catch @weaverryan, thanks for the patch.";
+    const PULL_REQUEST_NUMBER = 7;
+
     public function testCommand()
     {
-        $this->httpClient->whenGet('repos/cordoval/gush/pulls/7')
+        $this->httpClient->whenGet('repos/cordoval/gush/pulls/'.self::PULL_REQUEST_NUMBER)
             ->thenReturn(
                 [
-                    'number' => 7,
+                    'number' => self::PULL_REQUEST_NUMBER,
                     'user' => ['login' => 'weaverryan'],
                 ]
             )
         ;
 
         $this->httpClient->whenPost(
-                'repos/cordoval/gush/issues/7/comments',
-                json_encode(['body' => "Good catch @weaverryan, thanks for the patch."])
+                'repos/cordoval/gush/issues/'.self::PULL_REQUEST_NUMBER.'/comments',
+                json_encode(['body' => self::TEMPLATE_STRING])
             )->thenReturn(
                 [
-                    'number' => 7,
+                    'number' => self::PULL_REQUEST_NUMBER,
                 ]
             )
         ;
@@ -43,21 +46,24 @@ class PullRequestPatOnTheBackCommandTest extends BaseTestCase
         $template = $this->expectTemplateHelper();
         $tester = $this->getCommandTester($command = new PullRequestPatOnTheBackCommand());
         $command->getHelperSet()->set($template, 'template');
-        $tester->execute(['--org' => 'cordoval', '--repo' => 'gush', 'pr_number' => 7]);
+        $tester->execute(
+            ['--org' => 'cordoval', '--repo' => 'gush', 'pr_number' => self::PULL_REQUEST_NUMBER]
+        );
 
         $this->assertEquals(OutputFixtures::PULL_REQUEST_PAT_ON_THE_BACK, trim($tester->getDisplay()));
     }
 
     private function expectTemplateHelper()
     {
-        $template = $this->getMock(
-            'Gush\Helper\TemplateHelper',
-            ['bindAndRender']
-        );
+        $template = $this->getMockBuilder('Gush\Helper\TemplateHelper')
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
         $template->expects($this->once())
             ->method('bindAndRender')
-            ->with(['author' => 'weaverryan'])
-            ->will('x')
+            ->with(['author' => 'weaverryan'], 'pats/general', 'pats')
+            ->will($this->returnValue(self::TEMPLATE_STRING))
         ;
 
         return $template;
