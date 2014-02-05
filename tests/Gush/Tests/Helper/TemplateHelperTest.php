@@ -15,7 +15,12 @@ use Gush\Helper\TemplateHelper;
 
 class TemplateHelperTest extends \PHPUnit_Framework_TestCase
 {
+    /** @var \Gush\Helper\TemplateHelper */
     protected $helper;
+    protected $template;
+    protected $dialog;
+    protected $output;
+    protected $input;
 
     public function setUp()
     {
@@ -98,6 +103,7 @@ class TemplateHelperTest extends \PHPUnit_Framework_TestCase
             ['pull-request-create', 'default'],
             ['pull-request-create', 'symfony'],
             ['pull-request-create', 'symfony-doc'],
+            ['pats', 'general']
         ];
     }
 
@@ -181,8 +187,38 @@ class TemplateHelperTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function bind_()
+    public function it_should_bind_and_render()
     {
-        $this->assertTrue(true);
+        $this->template->expects($this->once())
+            ->method('getName')
+            ->will($this->returnValue('test/foobar'));
+
+        $this->input->expects($this->any())
+            ->method('hasOption')
+            ->will($this->returnCallback(function ($option) {
+                if ($option == 'test-option') {
+                    return true;
+                }
+            }));
+
+        $this->input->expects($this->any())
+            ->method('getOption')
+            ->will($this->returnCallback(function ($option) {
+                if ($option == 'test-option') {
+                    return 'test-option';
+                }
+            }));
+
+        $this->template->expects($this->once())
+            ->method('bind');
+
+        $this->template->expects($this->once())
+            ->method('render')
+            ->will($this->returnValue('foo'));
+
+        $this->helper->registerTemplate($this->template);
+
+        $res = $this->helper->bindAndRender(['author' => 'cslucano'], 'test', 'foobar');
+        $this->assertEquals('foo', $res);
     }
 }
