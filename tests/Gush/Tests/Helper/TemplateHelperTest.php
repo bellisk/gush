@@ -177,4 +177,9 @@ class TemplateHelperTest extends \PHPUnit_Framework_TestCase
         $res = $this->helper->askAndRender($this->output, 'test', 'foobar');
         $this->assertEquals('foo', $res);
     }
+
+    public function text_x_what_we_just_added()
+    {
+        $this->assertTrue(true);
+    }
 }
